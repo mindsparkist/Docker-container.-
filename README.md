@@ -2,66 +2,60 @@ When you are building an enterprise-grade server, you never use the default `apt
 
 Furthermore, security is paramount. Giving the `jenkins` user raw `sudo` access is considered a massive security risk, but there is a specific, restricted way to do it if your pipelines absolutely require it.
 
-Here is the exact, enterprise-standard bash execution to install everything correctly on an Ubuntu/Debian server.
-The easiest and most reliable way to install Docker on Ubuntu is through the official Docker repository to ensure you get the latest stable version. [1, 2] 
-## 1. Remove conflicting packages
-Before starting, uninstall any unofficial or old Docker packages to avoid conflicts: [3] 
+Here is the standard and most reliable way to install the latest version of Docker Engine on Ubuntu using Docker's official repository.
 
-sudo apt-get remove docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc
+### **Step 1: Update and install prerequisites**
+First, update your existing list of packages and install the necessary dependencies that allow `apt` to access repositories over HTTPS.
 
-## 2. Set up the repository [4] 
-Install the necessary prerequisites and add Docker's official GPG key: [1, 5] 
-
-# Update package list and install requirements
+```bash
 sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg
-# Add GPG key
+sudo apt-get install ca-certificates curl
+```
+
+### **Step 2: Add Docker’s official GPG key**
+Set up the keyring directory and download Docker's GPG key so your system trusts the packages.
+
+```bash
 sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-# Add the repository to Apt sources
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+```
+
+### **Step 3: Add the Docker repository**
+Add the official Docker repository to your system's package sources. This command automatically detects your Ubuntu version and architecture.
+
+```bash
 echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
 
-## 3. Install Docker Engine [3] 
-Update your package index again and install the latest Docker components: [1, 2] 
+### **Step 4: Install Docker Engine**
+Update your package index again (to recognize the new repository) and install Docker Engine, the CLI, containerd, and Docker Compose.
 
+```bash
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
 
-## 4. Verify the installation
-Run the hello-world image to confirm Docker is installed and running correctly: [3, 6] 
+### **Step 5: Verify the installation**
+Check that Docker is installed and running by executing the built-in `hello-world` image. 
 
+```bash
 sudo docker run hello-world
+```
+If the installation was successful, you will see a "Hello from Docker!" message indicating that the Docker daemon is working correctly.
 
-## Optional: Run Docker without sudo [1] 
-By default, only the root user can run Docker commands. To run them as a normal user, add yourself to the docker group: [1, 7, 8] 
+---
 
+### **Optional: Run Docker without `sudo`**
+By default, running `docker` commands requires administrator privileges (`sudo`). If you want to run Docker as a non-root user, add your user to the `docker` group:
+
+```bash
 sudo usermod -aG docker $USER
-
-Note: You must log out and log back in (or restart) for these changes to take effect. [1, 9] 
-------------------------------
-I can provide more specific instructions if you're interested in:
-
-* Setting up Docker Desktop for a graphical interface.
-* Configuring Docker Compose for multi-container apps.
-* Enabling GPU support for AI/ML workloads. [7, 10, 11] 
-
-
-[1] [https://www.digitalocean.com](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04)
-[2] [https://www.interserver.net](https://www.interserver.net/tips/kb/how-to-install-docker-on-ubuntu-24-04-lts/)
-[3] [https://docs.docker.com](https://docs.docker.com/engine/install/ubuntu/)
-[4] [https://www.youtube.com](https://www.youtube.com/watch?v=vCyf89qTdVo)
-[5] [https://www.theserverside.com](https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/How-to-install-Docker-and-docker-compose-on-Ubuntu)
-[6] [https://www.youtube.com](https://www.youtube.com/watch?v=TBTJsM1Jhno)
-[7] [https://www.digitalocean.com](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04)
-[8] [https://cloudinfrastructureservices.co.uk](https://cloudinfrastructureservices.co.uk/how-to-install-and-use-docker-engine-on-ubuntu-22-04/#:~:text=By%20default%2C%20only%20the%20root%20user%20or,run%20all%20Docker%20commands%20without%20root%20privileges.)
-[9] [https://docs.docker.com](https://docs.docker.com/engine/install/linux-postinstall/)
-[10] [https://docs.docker.com](https://docs.docker.com/desktop/setup/install/linux/ubuntu/)
-[11] [https://www.digitalocean.com](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-22-04)
-
+```
+*Note: You will need to log out and log back in (or restart your terminal) for these group changes to take effect.*
 
 ### Step 2: The Permissions (Jenkins, Docker, and Sudo)
 *Correction Note:* You actually want to add the **`jenkins` user to the `docker` group**, not the other way around. This allows Jenkins to run Docker commands without needing sudo passwords.
