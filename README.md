@@ -87,6 +87,45 @@ In an enterprise, you never install Python packages globally using `pip install`
 sudo apt-get install -y python3 python3-pip python3-venv
 ```
 
+You hit a classic modern Linux quirk! 
+
+Here is exactly what is happening: In modern Ubuntu versions, the OS intentionally leaves the `python` command blank. They force you to be specific by typing `python3`. This was done to prevent catastrophic system crashes when the world transitioned from Python 2 to Python 3, as many old background system scripts relied on the generic `python` command.
+
+Because you typed `python`, Linux threw its hands up. 
+
+Here are the three ways to fix it, ranked by best practice.
+
+### Fix 1: The Quickest Way (The standard approach)
+The simplest fix is to just append the `3` to your command. Whenever you write scripts or run commands on this server, explicitly call `python3`.
+
+```bash
+python3 -m py_compile app.py
+```
+
+### Fix 2: The Enterprise / CI/CD Way (Virtual Environments)
+Since you specifically installed `python3-venv` in your setup script, you should use it. When you create and "activate" a virtual environment, Linux temporarily aliases the `python` command directly to `python3` for you, safely isolating your app from the OS.
+
+Run these three commands in your project folder:
+```bash
+# 1. Create the virtual environment (named 'venv')
+python3 -m venv venv
+
+# 2. Activate it (Notice your terminal prompt will change to show '(venv)')
+source venv/bin/activate
+
+# 3. Now the generic 'python' command works perfectly!
+python -m py_compile app.py
+```
+*(To leave the virtual environment later, just type `deactivate`).*
+
+### Fix 3: The OS Override Way (Convenience)
+If you are tired of typing `python3` and want the generic `python` command to permanently default to Python 3 across the entire server, you can install the alias package that the error message suggested. 
+
+```bash
+sudo apt-get install -y python-is-python3
+```
+After running that, your original command (`python -m py_compile app.py`) will work perfectly without a virtual environment.
+
 ### Step 4: Install NPM and Node.js (The NodeSource Way)
 If you run `apt install npm`, you will get a version of Node that is years old. The enterprise standard is to use **NodeSource** to pull the current LTS (Long Term Support) version (e.g., Version 20).
 
