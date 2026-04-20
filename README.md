@@ -197,3 +197,134 @@ python3 --version
 node --version
 npm --version
 ```
+Excellent catch. Moving away from the built-in Flask development server (Werkzeug) to a production-grade WSGI server like Gunicorn is a critical step for scaling any application. The default development server is single-threaded and completely unsuited for live, concurrent traffic.
+
+Here is an important architectural note: Because you are containerizing this application with Docker, **you do not need to install Gunicorn directly onto your Ubuntu host machine.** Docker completely encapsulates your environment. We just need to instruct Docker to install and run Gunicorn *inside* the container.
+
+Here is exactly how to update your setup.
+
+### Step 1: Update your `requirements.txt`
+Before changing the Dockerfile, ensure Gunicorn is listed as a dependency in your repository. Open your `requirements.txt` file and add this line to the bottom:
+
+```text
+gunicorn==21.2.0
+```
+*(Note: You can use just `gunicorn`, but pinning a version number is best practice for CI/CD consistency).*
+
+---
+
+### Step 2: The Production-Ready Dockerfile
+Here is your updated Dockerfile. It remains lean, but the execution command has been swapped to use Gunicorn with multiple worker processes to handle concurrent requests.
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt ./
+
+# Install dependencies (Gunicorn will be installed here if added to requirements.txt)
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 5000
+
+# Start the app using Gunicorn instead of the dev server
+# --workers 4 allows it to handle multiple requests simultaneously
+# "app:app" tells Gunicorn to look in app.py for the Flask instance named 'app'
+CMD ["gunicorn", "--workers", "4", "--bind", "0.0.0.0:5000", "app:app"]
+```
+
+### 💡 Understanding the Gunicorn Command
+The final `CMD` line is the magic here. Let's break down `app:app`:
+* The **first `app`** refers to the name of your Python file (i.e., `app.py`).
+* The **second `app`** refers to the variable name of your Flask instance inside that file (e.g., `app = Flask(__name__)`).
+* *If your code looks like `server = Flask(__name__)`, you would change the command to `app:server`.*
+
+### Step 3: Native Ubuntu Installation (Optional)
+If you ever decide to test this bare-metal directly on your Ubuntu server *outside* of a Docker container, here are the standard commands to install it natively within a Python virtual environment:
+
+```bash
+# Navigate to your app directory
+cd /path/to/your/app
+
+# Create and activate a virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies and Gunicorn
+pip install -r requirements.txt
+pip install gunicorn
+
+# Run it natively on Ubuntu
+gunicorn --bind 0.0.0.0:5000 app:app
+```
+
+Commit that updated Dockerfile to your repository, and Jenkins will automatically build your new, highly available production image!
+
+Here is the Gunicorn setup formatted perfectly for a public GitHub `README.md` file. You can copy and paste this directly into your repository.
+
+***
+
+```markdown
+# 🚀 Productionizing Flask with Gunicorn and Docker
+
+This guide outlines the steps to transition a Python/Flask application from the built-in development server (Werkzeug) to a robust, production-ready WSGI server using **Gunicorn**, fully containerized with **Docker**.
+
+The default Flask development server is single-threaded and not designed for production traffic. By wrapping the application in Gunicorn, we enable multi-worker concurrency, allowing the application to handle multiple requests simultaneously.
+
+---
+
+## Step 1: Update Dependencies
+
+Before building the Docker image, ensure Gunicorn is listed as a dependency in your repository. 
+
+Add the following line to your `requirements.txt` file:
+
+```text
+gunicorn==21.2.0
+```
+*(Note: Pinning a specific version number is a best practice for CI/CD consistency and preventing unexpected breaks during builds).*
+
+---
+
+## Step 2: The Production-Ready Dockerfile
+
+Update your `Dockerfile` to install the requirements and swap the execution command to use Gunicorn instead of the standard Python command. 
+
+```dockerfile
+FROM python:3.11-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the requirements file and install dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port the app runs on
+EXPOSE 5000
+
+# Start the application using Gunicorn
+# --workers 4 allows it to handle multiple requests simultaneously
+# "app:app" tells Gunicorn to look in app.py for the Flask instance named 'app'
+CMD ["gunicorn", "--workers", "4", "--bind", "0.0.0.0:5000", "app:app"]
+```
+
+---
+
+## 💡 Understanding the Gunicorn Command
+
+The final `CMD` line in the Dockerfile is the engine of this setup: `CMD ["gunicorn", "--workers", "4", "--bind", "0.0.0.0:5000", "app:app"]`. 
+
+It is crucial to configure the target correctly. Let's break down the `"app:app"` string:
+
+* **The first `app`** refers to the name of your Python execution file (i.e., `app.py`).
+* **The second `app`** refers to the variable name of your Flask instance *inside* that file (e.g., `app = Flask(__name__)`).
+
+**Troubleshooting:** If your Python code initializes the server with a different variable name, such as `server = Flask(__name__)`, you must update the Dockerfile command to reflect this: `"app:server"`.
+```
