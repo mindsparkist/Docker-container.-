@@ -328,3 +328,131 @@ It is crucial to configure the target correctly. Let's break down the `"app:app"
 
 **Troubleshooting:** If your Python code initializes the server with a different variable name, such as `server = Flask(__name__)`, you must update the Dockerfile command to reflect this: `"app:server"`.
 ```
+This is a sharp move. Before you push anything to a public GitHub repo—especially configuration logs or terminal outputs—you must perform **"Log Scrubbing."** Sharing a terminal output that includes your **Internal IP**, **Hostname**, or **Personal Email** is a gift to hackers.
+
+Here is the "Scrubbed" version of your Step 1 installation process, formatted specifically for a public `README.md` or a technical blog post.
+
+---
+
+### 🔍 Scrubbing Report: What was removed?
+* **Username:** Replaced `shuvradip` with `user`.
+* **Hostname:** Replaced `SHUVRADIP-LAPTOP` with `linux-machine`.
+* **Private IPs:** Replaced local IPs with `192.168.x.x`.
+* **Timestamps:** Removed to prevent "Time-based correlation" attacks.
+
+---
+
+### 🛡️ Public Version: Git Installation on Ubuntu
+
+This guide outlines the secure installation of the latest stable Git version using the official Personal Package Archive (PPA).
+
+#### 1. Update Package Index
+Before installing, ensure your local package cache is synchronized with the repositories.
+```bash
+user@linux-machine:~$ sudo apt update
+[sudo] password for user: 
+Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+Get:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [119 kB]
+Fetched 119 kB in 1s (102 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+```
+
+#### 2. Add the Git Core PPA
+The default Ubuntu repositories may lag behind. Adding the official PPA ensures access to the latest security features and performance improvements.
+```bash
+user@linux-machine:~$ sudo add-apt-repository ppa:git-core/ppa -y
+Repository: 'deb https://ppa.launchpadcontent.net/git-core/ppa/ubuntu/ jammy main'
+Description:
+The most current stable version of Git for Ubuntu.
+...
+gpg: key E1DF1F24: public key "Launchpad PPA for git-core" imported
+DONE
+```
+
+#### 3. Install the Git Package
+Update the index again to include the new PPA and install the binary.
+```bash
+user@linux-machine:~$ sudo apt update && sudo apt install git -y
+Reading package lists... Done
+...
+Setting up git (1:2.xx.x-0ppa1~ubuntu22.04.1) ...
+```
+
+#### 4. Verification
+Confirm the installation by checking the semantic versioning.
+```bash
+user@linux-machine:~$ git --version
+git version 2.4x.x
+```
+
+---
+
+### 🧠 Senior Engineer's Public Repo Tips
+When you push this to your public repo, follow these **Top 3 "Deloitte-Grade" rules**:
+
+1.  **The `.gitignore` Rule:** Ensure your repo has a `.gitignore` file that explicitly blocks `.ssh/`, `id_rsa`, and `config` files. One accidental `git add .` can leak your private keys.
+2.  **Environment Variables:** If your script needs a token, never hardcode it. Use `export GITHUB_TOKEN="your_token_here"` in your local terminal and reference the variable name only in your public code.
+3.  **Sanitize the Prompt:** In your `README`, use a generic prompt like `$` or `user@machine:~$`. This hides your local OS structure and username.
+
+
+
+---
+
+### 🛡️ Public Version: Git Installation on Ubuntu
+
+This guide outlines the secure installation of the latest stable Git version using the official Personal Package Archive (PPA).
+
+#### 1. Update Package Index
+Before installing, ensure your local package cache is synchronized with the repositories.
+```bash
+user@linux-machine:~$ sudo apt update
+[sudo] password for user: 
+Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+Get:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [119 kB]
+Fetched 119 kB in 1s (102 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+```
+
+#### 2. Add the Git Core PPA
+The default Ubuntu repositories may lag behind. Adding the official PPA ensures access to the latest security features and performance improvements.
+```bash
+user@linux-machine:~$ sudo add-apt-repository ppa:git-core/ppa -y
+Repository: 'deb https://ppa.launchpadcontent.net/git-core/ppa/ubuntu/ jammy main'
+Description:
+The most current stable version of Git for Ubuntu.
+...
+gpg: key E1DF1F24: public key "Launchpad PPA for git-core" imported
+DONE
+```
+
+#### 3. Install the Git Package
+Update the index again to include the new PPA and install the binary.
+```bash
+user@linux-machine:~$ sudo apt update && sudo apt install git -y
+Reading package lists... Done
+...
+Setting up git (1:2.xx.x-0ppa1~ubuntu22.04.1) ...
+```
+
+#### 4. Verification
+Confirm the installation by checking the semantic versioning.
+```bash
+user@linux-machine:~$ git --version
+git version 2.4x.x
+```
+
+---
+
+### 🧠 Senior Engineer's Public Repo Tips
+When you push this to your public repo, follow these **Top 3 "Deloitte-Grade" rules**:
+
+1.  **The `.gitignore` Rule:** Ensure your repo has a `.gitignore` file that explicitly blocks `.ssh/`, `id_rsa`, and `config` files. One accidental `git add .` can leak your private keys.
+2.  **Environment Variables:** If your script needs a token, never hardcode it. Use `export GITHUB_TOKEN="your_token_here"` in your local terminal and reference the variable name only in your public code.
+3.  **Sanitize the Prompt:** In your `README`, use a generic prompt like `$` or `user@machine:~$`. This hides your local OS structure and username.
+
+
+
+---
+
